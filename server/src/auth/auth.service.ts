@@ -39,6 +39,7 @@ export class AuthService {
 
     //login
     async login(email: string, pass: string, res: Response){
+        try{
         //finding the user
         const user = await this.prisma.user.findUnique({where:{email}});
         if(!user)throw new UnauthorizedException('invalid credentials');
@@ -59,6 +60,9 @@ export class AuthService {
             path:'/',
         });
         return {message:'Logged in successfully'};
+        }catch(err){
+            console.error("CIRITCAL LOGIN ERROR", err);
+        }
     }
 
     //jwt token refresh
