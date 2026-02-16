@@ -6,20 +6,29 @@ export class TasksService {
     constructor(private prisma: PrismaService){}
 
     //creating tasks
-    async create(userId:number, title:string, description:string){
+    async create(userId:number, title:string, description?:string){
         return this.prisma.task.create({
             data:{
                 title,
-                description,
+                description:description||'',
                 userId
             }
         });
     }
 
     //getting all tasks
-    async findAll(userId: number){
+    async findAll(userId: number, search?: string){
         return this.prisma.task.findMany({
-            where:{userId},
+            where:{
+                userId:userId,
+                //this is only applies if user search the tasks by the title
+                ...(search &&{
+                    title:{
+                        contains:search,
+                        mode:'insensitive',
+                    },
+                }),
+            },
         });
     }
 
@@ -43,4 +52,5 @@ export class TasksService {
             },
         });
     }
+
 }

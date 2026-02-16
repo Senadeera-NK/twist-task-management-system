@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Body, UseGuards, Request, ParseIntPipe, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, ParseIntPipe, Patch, Param, Delete, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from './tasks.service';
+import { createTaskDto } from './dto/create-task.dto';
 
 @Controller('tasks')
 @UseGuards(AuthGuard('jwt'))
@@ -8,13 +9,13 @@ export class TasksController {
     constructor(private tasksService: TasksService){}
 
     @Post('/create')
-    async createTask(@Body() body:any, @Request() req:any){
+    async createTask(@Body() body:createTaskDto, @Request() req:any){
         return this.tasksService.create(req.user.userId, body.title, body.description);
     }
 
     @Get('/get-all')
-    async findAllTasks(@Request() req:any){
-        return this.tasksService.findAll(req.user.userId);
+    async findAllTasks(@Request() req:any, @Query('search') search?:string){
+        return this.tasksService.findAll(req.user.userId, search);
     }
 
     @Patch(':id')

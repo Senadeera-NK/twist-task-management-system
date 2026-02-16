@@ -5,9 +5,17 @@ import { PrismaService } from './prisma/prisma.service';
 import {PrismaModule} from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { TasksModule } from './tasks/tasks.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [PrismaModule, AuthModule, TasksModule],
+  imports: [
+    ThrottlerModule.forRoot([{
+      ttl:60000,
+      limit:20,
+    }]),
+    PrismaModule, 
+    AuthModule, 
+    TasksModule],
   controllers: [],
   providers: [],
 })

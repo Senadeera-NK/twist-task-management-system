@@ -52,4 +52,19 @@ export class AuthService {
             access_token: await this.jwtService.signAsync(payload),
         }
     }
+
+    //jwt token refresh
+    async refresh(userId:number, email:string){
+        //checking if the user exists
+        const user = await this.prisma.user.findUnique({where:{id:userId}});
+        if(!user)throw new UnauthorizedException('User no longer exists');
+        
+        const payload = {sub:userId, email:email};
+
+        return {
+            access_token:await this.jwtService.signAsync(payload, {
+                expiresIn:'15m',
+            }),
+        };
+    }
 }
