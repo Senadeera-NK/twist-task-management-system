@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
+import { response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -48,6 +49,15 @@ export class AuthService {
 
         //generating the JWT
         const payload = {sub:user.id, email:user.email};
+        const access_token = await this.jwtService.signAsync(payload);
+
+        response.cookie('access_token', access_token, {
+            httpOnly:true,
+            secure:process.env.NODE_ENV == "production",
+            sameSite:'strict',
+            maxAge:3600000,
+            path:'/',
+        });
         return {
             access_token: await this.jwtService.signAsync(payload),
         }
