@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
-import { response } from 'express';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -38,7 +38,7 @@ export class AuthService {
     }
 
     //login
-    async login(email: string, pass: string){
+    async login(email: string, pass: string, res: Response){
         //finding the user
         const user = await this.prisma.user.findUnique({where:{email}});
         if(!user)throw new UnauthorizedException('invalid credentials');
@@ -51,16 +51,14 @@ export class AuthService {
         const payload = {sub:user.id, email:user.email};
         const access_token = await this.jwtService.signAsync(payload);
 
-        response.cookie('access_token', access_token, {
+        res.cookie('access_token', access_token, {
             httpOnly:true,
             secure:process.env.NODE_ENV == "production",
-            sameSite:'strict',
+            sameSite:'lax',
             maxAge:3600000,
             path:'/',
         });
-        return {
-            access_token: await this.jwtService.signAsync(payload),
-        }
+        return {message:'Logged in successfully'};
     }
 
     //jwt token refresh
