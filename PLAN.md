@@ -4,48 +4,48 @@
 
 | Layer | Technology | Justification |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js 15 (App Router) | Chosen for Server-Side Rendering (SSR) capabilities and robust routing. |
-| **Backend** | NestJS | Chosen over Express for its **opinionated architecture**, built-in Dependency Injection, and superior TypeScript support. |
-| **Database** | PostgreSQL + Prisma | Ensures data integrity via a relational schema and provides a type-safe ORM. |
-| **Validation** | Zod | Used for schema validation on both Client and Server to ensure data contract consistency. |
+| **Frontend** | Next.js 15 (App Router) | Chosen for optimized rendering, built-in routing, and seamless integration with TypeScript. |
+| **Backend** | **NestJS** | Chosen over Express for its **Modular Architecture**, built-in Dependency Injection, and robust support for Middleware, Guards, and Pipes. |
+| **Database** | **PostgreSQL (Supabase)** | A reliable relational database that ensures data integrity and supports complex queries for task management. |
+| **ORM** | **Prisma** | Provides a type-safe database client, which significantly reduces runtime errors and simplifies database migrations. |
 
 ---
 
 ## 2. High-Level Architecture
-The application follows a **Modular Layered Architecture**. This ensures that the business logic is decoupled from the transport layer (HTTP/API).
+The backend is built using a **Modular Layered Architecture**. This ensures that the application is scalable and that business logic is separated from the transport layer.
 
 
 
-1.  **Presentation Layer (Next.js):** Client-side state management and UI components.
-2.  **Controller Layer (NestJS):** Handles request/response mapping and DTO validation.
-3.  **Service Layer:** The core business logic (e.g., Task ownership verification).
-4.  **Data Access Layer (Prisma):** Abstracted database interactions.
+1.  **Controller Layer:** Manages HTTP request/response cycles and handles input validation via DTOs.
+2.  **Service Layer:** Contains the core business logic, including password hashing and task ownership verification.
+3.  **Data Access Layer (Prisma):** Handles all communication with the PostgreSQL database.
 
 ---
 
 ## 3. Security Strategy (Core Focus)
-To meet the 20% security rubric, the following measures are planned:
+To meet the 20% security rubric, the following measures have been implemented:
 
 ### A. Authentication & Identity
-* **JWT Authentication:** Stateless authentication using JSON Web Tokens.
-* **Secure Cookies:** Tokens will be issued via **HttpOnly** cookies to prevent JavaScript-based XSS token theft.
-* **Password Security:** Implementation of `bcrypt` for one-way salted hashing.
+* **JWT Authentication:** Implemented stateless authentication using JSON Web Tokens (Access and Refresh tokens).
+* **Password Security:** Industry-standard `bcrypt` is used for one-way salted hashing of user passwords.
+* **Environment Safety:** All sensitive keys (Database URLs and JWT Secrets) are managed via `.env` files to prevent credential leakage.
 
 ### B. Defensive Engineering
-* **RBAC (Role-Based Access Control):** Specifically, **Resource Ownership Checks**. The backend will verify that `Task.userId === Request.user.id` for every `PUT/DELETE` operation.
-* **Rate Limiting:** Guarding the `/auth` endpoints against brute-force attacks using `nestjs/throttler`.
-* **Input Sanitization:** Using Zod to strip unknown fields (preventing Mass Assignment attacks) and sanitizing strings to prevent NoSQL/SQL Injection.
+* **Ownership Validation:** The backend strictly enforces that users can only `GET`, `UPDATE`, or `DELETE` tasks where `Task.userId === Request.user.id`.
+* **Rate Limiting:** Integrated `@nestjs/throttler` to protect the API from brute-force login attempts and DoS attacks.
+* **Input Sanitization:** Global `ValidationPipe` combined with `class-validator` ensures that only clean, validated data reaches the service layer.
+* **Error Masking:** Implemented a global exception filter to catch internal errors and prevent sensitive stack traces from being exposed to the client.
 
 ---
 
-## 4. Novelty Feature: "Optimistic Task Persistence"
-**Feature:** I will implement **Optimistic UI Updates** using React Hooks/TanStack Query.
-* **Reasoning:** This enhances UX by showing the task as "Completed" instantly on the UI, while the server syncs in the background. It demonstrates an understanding of modern state management and "perceived performance."
+## 4. Novelty Feature: "Server-Side Keyword Search"
+**Feature:** Advanced Task Filtering.
+* **Reasoning:** To go beyond basic CRUD, I implemented a search mechanism that allows users to filter tasks by title keywords using a case-insensitive database query. This provides a better user experience for power users with many tasks.
 
 ---
 
 ## 5. Alternative Considerations
-In a large-scale production scenario, I would recommend:
-1.  **Redis:** For session blacklisting (in case a JWT needs to be revoked).
-2.  **Docker:** For containerization to ensure "it works on my machine" translates to production.
-3.  **Winston/Pino:** For structured logging to monitor for security anomalies.
+In a production scenario, I would recommend:
+1.  **CORS White-listing:** Restricting API access strictly to the production frontend domain.
+2.  **Health Checks:** Adding a `/health` endpoint to monitor database and server uptime.
+3.  **Dockerization:** Using Docker to ensure a consistent environment across development, staging, and production.
