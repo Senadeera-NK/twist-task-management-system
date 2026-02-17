@@ -19,7 +19,7 @@ export default function Page() {
   const [editingTask, setEditingTask] = useState(null);
   const router = useRouter();
 
-  // 1. Fetch Tasks on Mount
+  //Fetch Tasks on Mount
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -35,7 +35,7 @@ export default function Page() {
     fetchTasks();
   }, [router]);
 
-  // 2. Logic for Search (Engineering Maturity: Done locally for speed)
+  //saerching/filtering tasks automatically
   const filteredTasks = tasks.filter((task) =>
     task.title.toLowerCase().includes(search.toLowerCase()) ||
     task.description.toLowerCase().includes(search.toLowerCase())
@@ -63,7 +63,6 @@ export default function Page() {
     }
   };
   const handleLogout = async () => {
-    // In a real app, hit an /auth/logout endpoint to clear cookies
     await api.post("/auth/logout").catch(() => {}); 
     router.push("/auth/login");
   };
@@ -76,7 +75,7 @@ export default function Page() {
           <h1 className="text-3xl font-bold text-gray-800">My Tasks</h1>
           <button 
             onClick={handleLogout}
-            className="text-sm bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
+            className="text-sm text-red-100 bg-red-500 hover:bg-red-300 px-4 py-2 rounded"
           >
             Logout
           </button>
@@ -91,9 +90,6 @@ export default function Page() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-            Search
-          </button>
           <button onClick={handleCreateClick} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
             New Task
           </button>
@@ -101,7 +97,10 @@ export default function Page() {
 
         {/* Task Grid */}
         {loading ? (
-          <div className="text-center py-10 text-gray-500">Loading tasks...</div>
+        <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-500 animate-pulse">Fetching your workspace...</p>
+        </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTasks.map((task) => (
