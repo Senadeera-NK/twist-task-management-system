@@ -38,32 +38,27 @@ export class AuthService {
     }
 
     //login
-    async login(email: string, pass: string, res: Response){
-        try{
-        //finding the user
-        const user = await this.prisma.user.findUnique({where:{email}});
-        if(!user)throw new UnauthorizedException('invalid credentials');
+async login(email: string, pass: string, res: Response) {
+    // checking the user existance
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new UnauthorizedException('Invalid credentials');
 
-        //compare passwords
-        const isMatch = await bcrypt.compare(pass, user.password);
-        if(!isMatch)throw new UnauthorizedException('Invalid credentials');
+    const isMatch = await bcrypt.compare(pass, user.password);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-        //generating the JWT
-        const payload = {sub:user.id, email:user.email};
-        const access_token = await this.jwtService.signAsync(payload);
+    const payload = { sub: user.id, email: user.email };
+    const access_token = await this.jwtService.signAsync(payload);
 
-        res.cookie('access_token', access_token, {
-            httpOnly:true,
-            secure:true,
-            sameSite:'none',
-            maxAge:3600000,
-            path:'/',
-        });
-        return {message:'Logged in successfully'};
-        }catch(err){
-            console.error("CIRITCAL LOGIN ERROR", err);
-        }
-    }
+    res.cookie('access_token', access_token, {
+        httpOnly: true,
+        secure: true, 
+        sameSite: 'none',
+        maxAge: 3600000,
+        path: '/',
+    });
+
+    return res.send({ message: 'Logged in successfully' }); 
+}
 
     //jwt token refresh
     async refresh(userId:number, email:string){
