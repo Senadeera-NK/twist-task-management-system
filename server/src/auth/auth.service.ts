@@ -57,7 +57,7 @@ async login(email: string, pass: string, res: Response) {
         path: '/',
     });
 
-    return res.send({ message: 'Logged in successfully' }); 
+    return res.send({ message: 'Logged in successfully', user:{email:user.email} }); 
 }
 
     //jwt token refresh
