@@ -6,7 +6,11 @@ export function middleware(request:NextRequest){
 
     //when user trying to access dashboard without a token, go to login
     if(!token && request.nextUrl.pathname.startsWith('/dashboard')){
-        return NextResponse.redirect(new URL('/login', request.url));
+        return NextResponse.redirect(new URL('/auth/login', request.url));
     }
     return NextResponse.next();
+}
+
+export const config ={
+    matcher:['/dashboard/:path*', '/tasks/:path*', '/auth/:path*']
 }
