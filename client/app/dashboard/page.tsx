@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import api from "../components/lib/axios";
 import { useRouter } from "next/navigation";
+import TaskModal from "../components/TaskModal";
 
 interface Task {
   id: string;
@@ -14,6 +15,8 @@ export default function Page() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const router = useRouter();
 
   // 1. Fetch Tasks on Mount
@@ -38,6 +41,27 @@ export default function Page() {
     task.description.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleEdit = (task:any) =>{
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateClick = () =>{
+    setEditingTask(null);
+    setIsModalOpen(true);
+  };
+
+  const fetchTasks = async()=>{
+    const response = await api.get("/tasks/get-all");
+    setTasks(response.data);
+  };
+
+  const handleDelete = async(id:number)=>{
+    if(confirm("Are you sure?")){
+        await api.delete(`/tasks/${id}`);
+        fetchTasks(); //refreshing the tasks
+    }
+  };
   const handleLogout = async () => {
     // In a real app, hit an /auth/logout endpoint to clear cookies
     await api.post("/auth/logout").catch(() => {}); 
@@ -70,7 +94,7 @@ export default function Page() {
           <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
             Search
           </button>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+          <button onClick={handleCreateClick} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
             New Task
           </button>
         </div>
@@ -92,8 +116,8 @@ export default function Page() {
                 <h3 className="font-semibold text-lg text-gray-900">{task.title}</h3>
                 <p className="text-gray-600 text-sm mt-1 line-clamp-2">{task.description}</p>
                 <div className="mt-4 flex gap-4">
-                  <button className="text-blue-600 border px-6 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium">Edit</button>
-                  <button className="text-red-500 border px-6 py-2 rounded-lg hover:bg-red-100 transitiontext-sm font-medium">Delete</button>
+                  <button onClick={()=>handleEdit(task)} className="text-blue-600 border px-6 py-2 rounded-lg hover:bg-blue-100 transition text-sm font-medium">Edit</button>
+                  <button onClick={()=>handleDelete(Number(task.id))}className="text-red-500 border px-6 py-2 rounded-lg hover:bg-red-100 transitiontext-sm font-medium">Delete</button>
                 </div>
               </div>
             ))}
@@ -105,6 +129,9 @@ export default function Page() {
             <p className="text-gray-500">No tasks found. Try a different search or create one!</p>
           </div>
         )}
+
+        {/* the modal */}
+        <TaskModal isOpen={isModalOpen} onClose={()=>setIsModalOpen(false)} onSuccess={fetchTasks} taskToEdit={editingTask}/>
       </div>
     </div>
   );
