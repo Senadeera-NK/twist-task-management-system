@@ -37,14 +37,14 @@ export default function Page() {
             type="email"
             placeholder="Email address"
             required
-            className="w-full rounded-md border p-2"
+            className="w-full text-black rounded-md border p-2"
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
             type="password"
             placeholder="Password"
             required
-            className="w-full rounded-md border p-2"
+            className="w-full text-black rounded-md border p-2"
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
