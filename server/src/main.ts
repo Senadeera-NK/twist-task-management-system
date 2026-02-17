@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
   app.enableCors({
-    origin:'http://localhost:3000',
+    origin:['http://localhost:3000','https://twist-task-management-system-nurkw3h8x.vercel.app/'],
     credentials:true,
   });
   app.useGlobalFilters(new AllExceptionsFilter());
